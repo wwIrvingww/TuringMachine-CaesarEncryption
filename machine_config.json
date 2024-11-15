@@ -1,0 +1,19 @@
+{
+    "states": ["q0", "q1", "q_accept", "q_reject"],
+    "input_symbols": ["0", "1"],
+    "tape_symbols": ["0", "1", "_"],
+    "initial_state": "q0",
+    "accept_state": "q_accept",
+    "reject_state": "q_reject",
+    "transitions": {
+      "q0": {
+        "0,0": ["q1", "1", "0", "R", "R"],
+        "0,_": ["q_reject", "0", "_", "N", "N"]
+      },
+      "q1": {
+        "1,0": ["q1", "1", "0", "R", "R"],
+        "1,1": ["q_accept", "1", "1", "N", "N"]
+      }
+    }
+  }
+  
