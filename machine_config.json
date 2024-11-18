@@ -1,22 +1,19 @@
 {
-  "states": ["q0", "q1", "q2", "accept", "reject"],
-  "input_symbols": ["a", "b", "c"],
+  "states": ["q0", "encrypt", "accept", "reject"],
+  "input_symbols": ["a", "b", "c", "_"],
   "tape_symbols": ["a", "b", "c", "_"],
   "initial_state": "q0",
   "accept_state": "accept",
   "reject_state": "reject",
   "transitions": {
     "q0": {
-      "a,_,_": ["q1", "b", "_", "_", "R", "S", "S"],
-      "b,_,_": ["q2", "c", "_", "_", "R", "S", "R"],
+      "a,_,_": ["encrypt", "b", "_", "_", "R", "S", "S"],
+      "b,_,_": ["encrypt", "c", "_", "_", "R", "S", "S"],
+      "#,_,_": ["encrypt", "#", "_", "_", "R", "S", "S"],
       "_,_,_": ["accept", "_", "_", "_", "S", "S", "S"]
     },
-    "q1": {
-      "b,_,_": ["q2", "c", "_", "a", "S", "S", "R"]
-    },
-    "q2": {
-      "c,_,a": ["accept", "_", "_", "_", "S", "S", "S"]
+    "encrypt": {
+      "#,_,_": ["accept", "#", "_", "_", "S", "S", "S"]
     }
   }
 }
-

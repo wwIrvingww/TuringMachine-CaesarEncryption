@@ -12,7 +12,7 @@ class TuringMachineThreeTape:
         self.transitions = config["transitions"]
         self.current_state = self.initial_state
 
-        # Inicializar las cintas y cabezales
+        # Inicializar cintas y cabezales
         self.tape1 = ['_']
         self.tape2 = ['_']
         self.tape3 = ['_']
@@ -38,19 +38,42 @@ class TuringMachineThreeTape:
         symbol3 = self.tape3[self.head3]
         transition_key = f"{symbol1},{symbol2},{symbol3}"
 
-        # Verificar transición
-        if transition_key not in self.transitions.get(self.current_state, {}):
+        # Verificar transición específica
+        if transition_key in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][transition_key]
+        # Verificar transición con comodines en varias combinaciones
+        elif f"#,{symbol2},{symbol3}" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,{symbol2},{symbol3}"]
+            write1 = symbol1  # Mantener el símbolo actual de la cinta 1
+        elif f"{symbol1},#,{symbol3}" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},#,{symbol3}"]
+            write2 = symbol2  # Mantener el símbolo actual de la cinta 2
+        elif f"{symbol1},{symbol2},#" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},{symbol2},#"]
+            write3 = symbol3  # Mantener el símbolo actual de la cinta 3
+        elif f"#,#,{symbol3}" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,#,{symbol3}"]
+            write1, write2 = symbol1, symbol2  # Mantener los símbolos actuales en cintas 1 y 2
+        elif f"#,{symbol2},#" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,{symbol2},#"]
+            write1, write3 = symbol1, symbol3  # Mantener los símbolos actuales en cintas 1 y 3
+        elif f"{symbol1},#,#" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},#,#"]
+            write2, write3 = symbol2, symbol3  # Mantener los símbolos actuales en cintas 2 y 3
+        elif f"#,#,#" in self.transitions.get(self.current_state, {}):
+            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,#,#"]
+            write1, write2, write3 = symbol1, symbol2, symbol3  # Mantener los símbolos actuales en todas las cintas
+        else:
+            # Si no hay transición válida, ir al estado de rechazo
             self.current_state = self.reject_state
             return "Rejected"
 
-        # Obtener nueva configuración
-        new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][transition_key]
 
-        # Escribir en las cintas
+        # Actualizar estado y cintas
+        self.current_state = new_state
         self.tape1[self.head1] = write1
         self.tape2[self.head2] = write2
         self.tape3[self.head3] = write3
-        self.current_state = new_state
 
         # Mover cabezales
         self.move_head(move1, 1)
@@ -70,8 +93,6 @@ class TuringMachineThreeTape:
                 if self.head1 < 0:
                     self.tape1.insert(0, '_')
                     self.head1 = 0
-            elif direction == 'S':
-                pass  # No mover el cabezal
         elif tape_number == 2:
             if direction == 'R':
                 self.head2 += 1
@@ -82,8 +103,6 @@ class TuringMachineThreeTape:
                 if self.head2 < 0:
                     self.tape2.insert(0, '_')
                     self.head2 = 0
-            elif direction == 'S':
-                pass  # No mover el cabezal
         elif tape_number == 3:
             if direction == 'R':
                 self.head3 += 1
@@ -94,8 +113,6 @@ class TuringMachineThreeTape:
                 if self.head3 < 0:
                     self.tape3.insert(0, '_')
                     self.head3 = 0
-            elif direction == 'S':
-                pass  # No mover el cabezal
 
     def run(self):
         while self.current_state not in [self.accept_state, self.reject_state]:
@@ -104,3 +121,4 @@ class TuringMachineThreeTape:
 
         print(f"Final State: {self.current_state}, Tape1: {''.join(self.tape1)}, Tape2: {''.join(self.tape2)}, Tape3: {''.join(self.tape3)}")
         return self.current_state == self.accept_state
+
