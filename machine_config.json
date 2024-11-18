@@ -1,19 +1,22 @@
 {
-    "states": ["q0", "q1", "q_accept", "q_reject"],
-    "input_symbols": ["0", "1"],
-    "tape_symbols": ["0", "1", "_"],
-    "initial_state": "q0",
-    "accept_state": "q_accept",
-    "reject_state": "q_reject",
-    "transitions": {
-      "q0": {
-        "0,0": ["q1", "1", "0", "R", "R"],
-        "0,_": ["q_reject", "0", "_", "N", "N"]
-      },
-      "q1": {
-        "1,0": ["q1", "1", "0", "R", "R"],
-        "1,1": ["q_accept", "1", "1", "N", "N"]
-      }
+  "states": ["q0", "q1", "q2", "accept", "reject"],
+  "input_symbols": ["a", "b", "c"],
+  "tape_symbols": ["a", "b", "c", "_"],
+  "initial_state": "q0",
+  "accept_state": "accept",
+  "reject_state": "reject",
+  "transitions": {
+    "q0": {
+      "a,_,_": ["q1", "b", "_", "_", "R", "S", "S"],
+      "b,_,_": ["q2", "c", "_", "_", "R", "S", "R"],
+      "_,_,_": ["accept", "_", "_", "_", "S", "S", "S"]
+    },
+    "q1": {
+      "b,_,_": ["q2", "c", "_", "a", "S", "S", "R"]
+    },
+    "q2": {
+      "c,_,a": ["accept", "_", "_", "_", "S", "S", "S"]
     }
   }
-  
+}
+

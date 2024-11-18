@@ -1,12 +1,12 @@
 import json
-from turing_machine import TuringMachineTwoTape
+from turing_machine import TuringMachineThreeTape
 
 # Cargar configuración desde el archivo JSON
 with open("machine_config.json", "r") as file:
     config = json.load(file)
 
 # Inicializar la máquina de Turing
-tm = TuringMachineTwoTape(config)
+tm = TuringMachineThreeTape(config)
 
 # Leer la entrada del archivo de prueba
 with open("test.txt", "r") as file:
