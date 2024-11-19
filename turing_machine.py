@@ -20,11 +20,11 @@ class TuringMachineThreeTape:
         self.head2 = 0
         self.head3 = 0
 
-    def initialize_tapes(self, input_string):
+    def initialize_tapes(self, input1, input2, input3):
         # Inicializar cinta 1 con la entrada y cintas 2 y 3 vacías
-        self.tape1 = list(input_string) + ['_']
-        self.tape2 = ['_']
-        self.tape3 = ['_']
+        self.tape1 = list(input1) + ['_']
+        self.tape2 = list(input2)+['_']
+        self.tape3 = list(input3)+['_']
 
     def step(self):
         if self.current_state == self.accept_state:
@@ -37,38 +37,35 @@ class TuringMachineThreeTape:
         symbol2 = self.tape2[self.head2]
         symbol3 = self.tape3[self.head3]
         transition_key = f"{symbol1},{symbol2},{symbol3}"
+        
+        ## parse key
+        possible_keys = []
+        var_storage = ""
+        all_trans = list(self.transitions[self.current_state].keys())
+        for trans in all_trans:
+            positions = trans.split(",")
+            if((symbol1 == positions[0] or positions[0] in ["#","var"]) 
+               and (symbol2 == positions[1] or positions[1] in ["#","var"]) 
+               and (symbol3== positions[2]or positions[2] in ["#","var"])):
 
-        # Verificar transición específica
-        if transition_key in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][transition_key]
-        # Verificar transición con comodines en varias combinaciones
-        elif f"#,{symbol2},{symbol3}" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,{symbol2},{symbol3}"]
-            write1 = symbol1  # Mantener el símbolo actual de la cinta 1
-        elif f"{symbol1},#,{symbol3}" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},#,{symbol3}"]
-            write2 = symbol2  # Mantener el símbolo actual de la cinta 2
-        elif f"{symbol1},{symbol2},#" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},{symbol2},#"]
-            write3 = symbol3  # Mantener el símbolo actual de la cinta 3
-        elif f"#,#,{symbol3}" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,#,{symbol3}"]
-            write1, write2 = symbol1, symbol2  # Mantener los símbolos actuales en cintas 1 y 2
-        elif f"#,{symbol2},#" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,{symbol2},#"]
-            write1, write3 = symbol1, symbol3  # Mantener los símbolos actuales en cintas 1 y 3
-        elif f"{symbol1},#,#" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"{symbol1},#,#"]
-            write2, write3 = symbol2, symbol3  # Mantener los símbolos actuales en cintas 2 y 3
-        elif f"#,#,#" in self.transitions.get(self.current_state, {}):
-            new_state, write1, write2, write3, move1, move2, move3 = self.transitions[self.current_state][f"#,#,#"]
-            write1, write2, write3 = symbol1, symbol2, symbol3  # Mantener los símbolos actuales en todas las cintas
-        else:
-            # Si no hay transición válida, ir al estado de rechazo
-            self.current_state = self.reject_state
-            return "Rejected"
+                possible_keys.append(trans)
+                if(positions[0]=="var"):
+                    var_storage = symbol1
+                elif(positions[1]=="var"):
+                    var_storage = symbol2
+                elif(positions[2]=="var"):
+                    var_storage = symbol3
 
-
+        new_transition_key = min(possible_keys, key=lambda x: x.count('#'))
+        
+        result = list(self.transitions[self.current_state][new_transition_key])
+        for i in range(1,4):
+            if(result[i]=="#"):
+                result[i]=transition_key.split(",")[i-1]
+            elif(result[i]=="var"):
+                result[i]=var_storage
+        
+        new_state, write1, write2, write3, move1, move2, move3 = result
         # Actualizar estado y cintas
         self.current_state = new_state
         self.tape1[self.head1] = write1
@@ -114,11 +111,38 @@ class TuringMachineThreeTape:
                     self.tape3.insert(0, '_')
                     self.head3 = 0
 
+    def print_config(self):
+        print("State:",self.current_state)
+        tape_1 = ""
+        for i in range(len(self.tape1)):
+            if (i==self.head1):
+                tape_1 = tape_1+" *"+self.tape1[i]
+            else:
+                tape_1 = tape_1+self.tape1[i]
+        print("Tape 1:",tape_1)
+        
+        tape_2 = ""
+        for i in range(len(self.tape2)):
+            if (i==self.head2):
+                tape_2 = tape_2+" *"+self.tape2[i]
+            else:
+                tape_2 = tape_2+self.tape2[i]
+        print("Tape 2:",tape_2)
+        
+        tape_3 = ""
+        for i in range(len(self.tape3)):
+            if (i==self.head3):
+                tape_3 = tape_3+" *"+self.tape3[i]
+            else:
+                tape_3 = tape_3+self.tape3[i]
+        print("Tape 3:",tape_3)
+
     def run(self):
         while self.current_state not in [self.accept_state, self.reject_state]:
-            print(f"State: {self.current_state}, Tape1: {''.join(self.tape1)}, Head1: {self.head1}, Tape2: {''.join(self.tape2)}, Head2: {self.head2}, Tape3: {''.join(self.tape3)}, Head3: {self.head3}")
+            self.print_config()
             status = self.step()
+            print("")
 
         print(f"Final State: {self.current_state}, Tape1: {''.join(self.tape1)}, Tape2: {''.join(self.tape2)}, Tape3: {''.join(self.tape3)}")
         return self.current_state == self.accept_state
-
+    
